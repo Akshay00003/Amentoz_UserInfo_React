@@ -1,0 +1,29 @@
+.container {
+  width: 25%;
+  background-color: rgb(227, 227, 230);
+  height: 91vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-right: 1px solid black;
+  .btnS{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    flex-direction: column;
+    .btn1{
+        width: 300px;
+        height: 30px;
+        border-radius: 5px;
+        border: none;
+        background:linear-gradient(to bottom, rgb(146, 179, 206), blue);
+        color: white;
+        font-weight: 600;
+        font-size: 15px;
+        letter-spacing: 0.7px;
+        cursor: pointer;
+    }
+  }
+}
