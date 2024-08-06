@@ -1,25 +1,36 @@
-import React, { useState } from "react";
-import style from "./AddForm.module.scss";
-import axios from "axios";
-import { useDispatch } from "react-redux";
-import { selectView } from "../../features/Store";
+import React, { useEffect, useState } from 'react';
+import style from './UpdateForm.module.scss';
+import axios from 'axios';
+import { useSelector,useDispatch } from 'react-redux';
+import { FaWindowClose } from "react-icons/fa";
+import { setUserId } from '../../features/Store';
 
-const AddForm = () => {
+const UpdateForm = () => {
+  const id = useSelector((state) => state.user.userId);
   const dispatch=useDispatch()
-  const [inputValues, setInputValues] = useState({
-    userName: "",
-    address: "",
-    email: "",
-    password: "",
 
-  });
-  const [image,setImage]=useState("")
+  const [user, setUser] = useState({});
+  const [userName, setUserName] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
+  const [password, setPassword] = useState("");
+  const [image, setImage] = useState("");
   const [errors, setErrors] = useState({});
-  const { userName, address, email, password } = inputValues;
-  const handleInputValues = (e) => {
-    const { name, value } = e.target;
-    setInputValues({ ...inputValues, [name]: value });
-  };
+
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const result = await axios.get(`http://localhost:4000/user/${id}`);
+        setUser(result.data);
+        setUserName(result.data.userName);
+        setEmail(result.data.email);
+        setAddress(result.data.address);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    getUser();
+  }, [id]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -43,40 +54,44 @@ const AddForm = () => {
 
     return newErrors;
   };
-  const handleCreate = (e) => {
+
+  const handleCreate = async (e) => {
     e.preventDefault();
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
     } else {
       setErrors({});
-      try{
-        const formData=new FormData()
-        formData.append('userName',inputValues.userName)
-        formData.append('email', inputValues.email)
-        formData.append('address', inputValues.address)
-        formData.append('password', inputValues.password)
-        formData.append('image', image)
-        axios.post("http://localhost:4000/create",  formData )
-        .then(result=>console.log('after submit',result.data)
-        )
-        dispatch(selectView())
-      }catch(err){
+      try {
+        const formData = new FormData();
+        formData.append('userName', userName);
+        formData.append('email', email);
+        formData.append('address', address);
+        formData.append('password', password);
+        formData.append('image', image);
+        console.log(formData);
+
+
+        const result = await axios.put(`http://localhost:4000/update/${id}`, formData);
+        console.log('After submit:', result.data);
+        dispatch(setUserId(""))
+
+        // Assuming selectView() is a function you need to call after successful update
+        // dispatch(selectView());
+      } catch (err) {
         console.log(err);
-
       }
-
-      // Proceed with form submission logic (e.g., API call)
-      console.log("Form submitted successfully:", inputValues);
     }
   };
+
   return (
     <div className={style.container}>
       <form>
+      <FaWindowClose onClick={()=>dispatch(setUserId(""))} size={30} className={style.close} />
         <div className={style.name}>
           <label>UserName</label>
           <input
-            onChange={handleInputValues}
+            onChange={(e) => setUserName(e.target.value)}
             value={userName}
             name="userName"
             type="text"
@@ -90,7 +105,7 @@ const AddForm = () => {
           <input
             name="password"
             value={password}
-            onChange={handleInputValues}
+            onChange={(e) => setPassword(e.target.value)}
             type="password"
           />
           {errors.password && (
@@ -102,7 +117,7 @@ const AddForm = () => {
           <input
             name="email"
             value={email}
-            onChange={handleInputValues}
+            onChange={(e) => setEmail(e.target.value)}
             type="email"
           />
           {errors.email && <span className={style.error}>{errors.email}</span>}
@@ -112,7 +127,7 @@ const AddForm = () => {
           <input
             name="address"
             value={address}
-            onChange={handleInputValues}
+            onChange={(e) => setAddress(e.target.value)}
             type="text"
           />
           {errors.address && (
@@ -123,8 +138,7 @@ const AddForm = () => {
           <label>Image</label>
           <input
             name="image"
-
-            onChange={(e)=>setImage(e.target.files[0])}
+            onChange={(e) => setImage(e.target.files[0])}
             type="file"
           />
           {errors.image && <span className={style.error}>{errors.image}</span>}
@@ -135,4 +149,4 @@ const AddForm = () => {
   );
 };
 
-export default AddForm;
+export default UpdateForm;
